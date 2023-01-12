@@ -11,4 +11,4 @@ apt update
 apt install -y cmake --no-install-recommends
 apt install -y clang clang-format-10 clang-tidy-10 libeigen3-dev unzip
 
-apt install -y python3-venv pip python3-gdal python3-tk
+apt install -y python3-venv python3-pip python3-gdal python3-tk
