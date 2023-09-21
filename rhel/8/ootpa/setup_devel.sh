@@ -13,5 +13,3 @@ cmake -B build .
 cd build
 make install
 
-dnf install -y python3
-
