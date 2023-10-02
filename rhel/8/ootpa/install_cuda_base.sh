@@ -2,23 +2,23 @@
 
 set -e
 
-# From https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist/11.2.2/ubi8/base
-CUDA_REPO_DECLARATION="[cuda]\n
-name=cuda\n
-baseurl=https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64\n
-enabled=1\n
-gpgcheck=1\n
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA\n
-"
+if [ ! -e "/etc/yum.repos.d/cuda.repo" ]; then
+    # From https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist/11.2.2/ubi8/base
+    CUDA_REPO_DECLARATION="[cuda]
+    name=cuda
+    baseurl=https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64
+    enabled=1
+    gpgcheck=1
+    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA"
 
-echo $CUDA_REPO_DECLARATION > /tmp/cuda.repo
-cp /tmp/cuda.repo /etc/yum.repos.d/cuda.repo
+    echo "$CUDA_REPO_DECLARATION" > /tmp/cuda.repo
+    mv /tmp/cuda.repo /etc/yum.repos.d/cuda.repo
 
-# From https://gitlab.com/nvidia/container-images/cuda/-/blob/master/dist/11.2.2/ubi8/base/Dockerfile
-NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3b80c87
-curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/D42D0685.pub | sed '/^Version/d' > /tmp/RPM-GPG-KEY-NVIDIA
-cp /tmp/RPM-GPG-KEY-NVIDIA /etc/pki/rpm-gpg/.
-echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict -
+    NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3b80c87
+    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/D42D0685.pub | sed '/^Version/d' > /tmp/RPM-GPG-KEY-NVIDIA
+    cp /tmp/RPM-GPG-KEY-NVIDIA /etc/pki/rpm-gpg/.
+    echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict -
+fi
 
 CUDA_VERSION="11.2.2"
 NV_CUDA_CUDART_VERSION="11.2.152-1"
