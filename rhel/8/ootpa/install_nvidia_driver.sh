@@ -2,37 +2,34 @@
 
 set -e
 
-dnf update
+# If one does dnf/yum update/upgrade then most probably the drivers need to be reinstalled/built
+# because of the kernel version mismatch
 
-# https://www.redhat.com/en/blog/how-use-gpus-containers-bare-metal-rhel-8
+# For fresh system one might like to run `dnf update -y` after which restart is required in order to continue.
+# Also check if there are devices available - `lspci | grep -i nvidia`
+
+if lsmod | grep -q "nouveau"; then
+    echo "WARNING: nouveau is active, exiting installation"
+    exit 1
+fi
+
+# Commands from https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html
+yum install -y gcc
+dnf install -y kernel-devel-$(uname -r) kernel-headers-$(uname -r)
+
 dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-yum install -y kernel-devel kernel-headers dkms acpid
+set +e
+rpm --erase gpg-pubkey-7fa2af80*
+set -e
+distro="rhel8"
+arch="x86_64"
+dnf config-manager -y --add-repo https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-$distro.repo
+dnf clean expire-cache
+dnf module install -y nvidia-driver:latest-dkms
 
-# This is one of the many options. Via this repo, always the latest driver,
-# with all the complete modules (including CUDA SDK).
-# Also it seems to be performing tasks in the background that ensures the complete setup
-# From https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist/11.2.2/ubi8/base
-CUDA_REPO_DECLARATION="[cuda]
-name=cuda
-baseurl=https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64
-enabled=1
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA"
+echo "Pleare reboot the system before continuing interaction with NVIDIA GPU"
 
-echo "$CUDA_REPO_DECLARATION" > /tmp/cuda.repo
-mv /tmp/cuda.repo /etc/yum.repos.d/cuda.repo
-
-modprobe -r nouveau
-
-NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3b80c87
-curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/D42D0685.pub | sed '/^Version/d' > /tmp/RPM-GPG-KEY-NVIDIA
-cp /tmp/RPM-GPG-KEY-NVIDIA /etc/pki/rpm-gpg/.
-echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict -
-
-yum install -y cuda-drivers
-
-# Check if it works
-nvidia-smi
+# After reboot to check if it works - `nvidia-smi`
 
 # Troubleshoot
 # lsmod | grep "nouveau" > /dev/null && echo "WARNING: nouveau still active" || echo "Success"
@@ -45,7 +42,3 @@ nvidia-smi
 # blacklist nouveau
 # options nouveau modeset=0
 # EOF
-
-# lspci | grep -e VGA -ie NVIDIA
-
-
