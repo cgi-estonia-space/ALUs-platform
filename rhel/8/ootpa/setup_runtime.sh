@@ -16,7 +16,7 @@ cd /tmp
 tar -xzvf /tmp/gdal-3.0.4.tar.gz
 cd gdal-3.0.4
 # https://github.com/OSGeo/gdal/issues/2402#issuecomment-613612096 - jasper thing
-./configure --includedir=/usr/include/gdal --libdir=/usr/lib --with-python --without-jasper
+./configure --includedir=/usr/include/gdal --libdir=/usr/lib64 --with-python --without-jasper
 make -j8
 make install
 
