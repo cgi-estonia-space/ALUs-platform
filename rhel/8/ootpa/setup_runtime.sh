@@ -2,9 +2,8 @@
 
 set -e
 
-dnf update -y && dnf install -y gcc gcc-c++ 
+dnf install -y gcc gcc-c++ 
 dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-dnf update -y
 dnf install -y boost1.78-date-time boost1.78-log boost1.78-program-options
 dnf install -y libgeotiff-devel sqlite-devel proj-devel
 
