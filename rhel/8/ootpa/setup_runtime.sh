@@ -8,7 +8,8 @@ dnf install -y boost1.78-date-time boost1.78-log boost1.78-program-options
 dnf install -y libgeotiff-devel sqlite-devel proj-devel
 
 # Not needed for development but we intend to install gdal with python
-dnf install -y python3 python3-devel
+# numpy required for gdal_compare which utilizes _gdal_array
+dnf install -y python3 python3-devel python3-numpy
 
 # The official version available on base RHEL 8 as well.
 curl -o /tmp/gdal-3.0.4.tar.gz -L https://github.com/OSGeo/gdal/releases/download/v3.0.4/gdal-3.0.4.tar.gz 
